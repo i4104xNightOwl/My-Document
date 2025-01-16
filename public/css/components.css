@@ -1,0 +1,124 @@
+/* Category Tree Styles */
+.category-tree {
+    color: white;
+    font-size: 0.9rem;
+}
+
+.category-header {
+    padding: 4px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.category-header:hover {
+    background-color: rgba(0,0,0,0.05);
+}
+
+.category-name {
+    font-weight: 500;
+}
+
+.category-toggle {
+    transition: transform 0.2s;
+    width: 16px;
+    text-align: center;
+}
+
+.collapsed .category-toggle {
+    transform: rotate(-90deg);
+}
+
+.category-actions {
+    display: none;
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+
+.category-item {
+    position: relative;
+}
+
+.category-item:hover .category-actions {
+    display: block;
+}
+
+.document-list li a {
+    padding: 2px 4px;
+    margin: 1px 0;
+    border-radius: 4px;
+}
+
+.document-list li a:hover {
+    background-color: rgba(0,0,0,0.05);
+}
+
+.document-list .text-truncate {
+    max-width: 200px;
+}
+
+/* Search Input Styles */
+.category-tree .input-group .form-control {
+    border-right: none;
+}
+
+.category-tree .input-group .btn {
+    border-left: none;
+    background-color: white;
+}
+
+.category-tree .input-group .btn:hover {
+    background-color: #f8f9fa;
+}
+
+.category-tree .input-group .form-control:focus + .btn {
+    border-color: #86b7fe;
+}
+
+/* Card Styles */
+.card {
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.card-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+}
+
+/* Category Select Styles */
+.category-select {
+    font-family: monospace;
+}
+
+.category-select option {
+    font-family: system-ui, -apple-system, sans-serif;
+}
+
+.category-select option:not([value=""]) {
+    color: #333;
+}
+
+.category-select option[value=""] {
+    font-weight: normal;
+    color: #6c757d;
+}
+
+/* Indent cho các option */
+.category-select option {
+    padding: 4px;
+}
+
+
+.category-section h5 {
+    color: #495057;
+}
+
+.category-section .bi-folder {
+    margin-right: 8px;
+} 

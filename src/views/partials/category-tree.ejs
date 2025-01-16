@@ -1,0 +1,167 @@
+<div class="category-tree">
+    <!-- Thanh tìm kiếm -->
+    <div class="mb-3">
+        <form action="/documents/search" method="GET">
+            <div class="input-group">
+                <input type="search" 
+                    class="form-control form-control-sm shadow-none border-dark"
+                    name="q" 
+                    placeholder="Tìm kiếm tài liệu..." 
+                    value="<%= locals.searchQuery || '' %>">
+                <button class="btn btn-sm btn-outline-dark shadow-none" type="submit">
+                    <i class="bi bi-search"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Nút tạo danh mục -->
+    <div class="mb-3 d-flex gap-2">
+        <a href="/categories" class="btn btn-sm btn-outline-primary flex-grow-1 shadow-none">
+            <i class="bi bi-folder me-1"></i>
+            Danh mục
+        </a>
+        <button type="button"
+            class="btn btn-sm btn-outline-success shadow-none edit-mode-only d-none"
+            data-bs-toggle="modal"
+            data-bs-target="#createCategoryModal">
+            <i class="bi bi-plus-circle-fill"></i>
+        </button>
+    </div>
+
+    <!-- Cây danh mục -->
+    <ul class="list-unstyled">
+        <% if (!locals.categories || categories.length === 0) { %>
+            <li class="text-muted text-center py-3">
+                <i class="bi bi-folder-x display-4 d-block mb-2"></i>
+                Chưa có danh mục nào
+            </li>
+        <% } else { %>
+            <% function renderCategory(category) { %>
+                <li class="mb-2">
+                    <div class="category-item">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-grow-1">
+                                <div class="d-flex align-items-center category-header rounded" 
+                                    data-bs-toggle="collapse" 
+                                    data-bs-target="#category-<%= category.id %>"
+                                    role="button">
+                                    <i class="bi bi-chevron-right me-2 category-toggle"></i>
+                                    <span class="text-light category-name d-flex align-items-center justify-content-between w-100">
+                                        <span class="d-flex align-items-center">
+                                            <i class="bi bi-folder2 text-warning me-2"></i>
+                                            <%= category.name %>
+                                        </span>
+                                        <div class="edit-mode-only category-actions d-none">
+                                            <a href="/documents/create?categoryId=<%= category.id %>" 
+                                                class="btn btn-sm btn-link text-success p-0 ms-1"
+                                                title="Thêm tài liệu mới">
+                                                <i class="bi bi-plus-circle-fill"></i>
+                                            </a>
+                                            <button type="button"
+                                                class="btn btn-sm btn-link text-danger p-0 ms-1" 
+                                                title="Xóa danh mục"
+                                                onclick="deleteCategory('<%= category.id %>')">
+                                                <i class="bi bi-trash-fill"></i>
+                                            </button>
+                                        </div>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="collapse show" id="category-<%= category.id %>">
+                        <div class="ms-4">
+                            <!-- Danh sách tài liệu trong danh mục -->
+                            <% if (category.documents && category.documents.length > 0) { %>
+                                <ul class="list-unstyled mb-2 document-list">
+                                    <% category.documents.forEach(doc => { %>
+                                        <li>
+                                            <a href="/documents/<%= doc.slug %>" 
+                                                class="text-decoration-none text-muted d-flex align-items-center py-1 rounded">
+                                                <i class="bi bi-file-earmark-text me-2"></i>
+                                                <span class="text-truncate flex-grow-1"><%= doc.title %></span>
+                                            </a>
+                                        </li>
+                                    <% }); %>
+                                </ul>
+                            <% } %>
+
+                            <!-- Danh mục con -->
+                            <% if (category.children && category.children.length > 0) { %>
+                                <ul class="list-unstyled">
+                                    <% category.children.forEach(child => { %>
+                                        <%= renderCategory(child) %>
+                                    <% }); %>
+                                </ul>
+                            <% } %>
+                        </div>
+                    </div>
+                </li>
+            <% } %>
+
+            <% categories.forEach(category => { %>
+                <%= renderCategory(category) %>
+            <% }); %>
+        <% } %>
+    </ul>
+</div>
+
+<script>
+// Xử lý chuyển đổi chế độ edit/view
+const editModeSwitch = document.getElementById('editModeSwitch');
+const editModeElements = document.querySelectorAll('.edit-mode-only');
+
+editModeSwitch.addEventListener('change', function() {
+    editModeElements.forEach(element => {
+        element.classList.toggle('d-none', !this.checked);
+    });
+    localStorage.setItem('categoryTreeEditMode', this.checked);
+});
+
+// Khôi phục trạng thái từ localStorage
+document.addEventListener('DOMContentLoaded', function() {
+    const savedEditMode = localStorage.getItem('categoryTreeEditMode') === 'true';
+    editModeSwitch.checked = savedEditMode;
+    editModeElements.forEach(element => {
+        element.classList.toggle('d-none', !savedEditMode);
+    });
+});
+
+// Xử lý animation mũi tên khi mở/đóng danh mục
+document.querySelectorAll('[data-bs-toggle="collapse"]').forEach(item => {
+    item.addEventListener('click', event => {
+        const icon = item.querySelector('.category-toggle');
+        if (icon) {
+            icon.style.transform = `rotate(${item.classList.contains('collapsed') ? '-90deg' : '0deg'})`;
+            icon.style.transition = 'transform 0.2s ease';
+        }
+    });
+});
+
+// Xử lý xóa danh mục
+function deleteCategory(categoryId) {
+    if (confirm('Bạn có chắc muốn xóa danh mục này? Tất cả tài liệu trong danh mục sẽ bị xóa.')) {
+        fetch(`/categories/${categoryId}/delete`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                response.json().then(data => {
+                    alert(data.error || 'Có lỗi xảy ra khi xóa danh mục');
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Có lỗi xảy ra khi xóa danh mục');
+        });
+    }
+}
+</script>

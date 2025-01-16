@@ -1,0 +1,132 @@
+<div class="row mb-4">
+    <div class="col">
+        <h1 class="d-flex align-items-center">
+            <i class="bi bi-files"></i> 
+            <span class="ms-2">Danh sách tài liệu</span>
+            <a href="/documents/create" class="btn btn-primary btn-sm ms-auto">
+                <i class="bi bi-plus-lg me-1"></i>
+                Tạo tài liệu mới
+            </a>
+        </h1>
+    </div>
+</div>
+
+<% if (!categories || categories.length === 0) { %>
+    <div class="text-center py-5">
+        <i class="bi bi-folder2-open display-1 text-muted mb-3"></i>
+        <h4 class="text-muted">Chưa có tài liệu nào</h4>
+        <p class="text-muted">Hãy tạo tài liệu đầu tiên của bạn</p>
+        <a href="/documents/create" class="btn btn-primary">
+            <i class="bi bi-plus-lg me-1"></i>
+            Tạo tài liệu mới
+        </a>
+    </div>
+<% } else { %>
+    <% function renderCategoryDocuments(category, level = 0) { %>
+        <div class="category-section mb-4 ps-4" style="margin-left: <%= level * 40 %>px; border-left: 1px solid #e0e0e0;">
+            <div class="d-flex align-items-center mb-3">
+                <h5 class="mb-0 d-flex align-items-center">
+                    <i class="bi bi-folder2-open text-warning me-2"></i>
+                    <%= category.name %>
+                    <% if (category.documentsCount > 0) { %>
+                        <span class="badge bg-primary rounded-pill ms-2"><%= category.documentsCount %></span>
+                    <% } %>
+                    <a href="/documents/create?categoryId=<%= category.id %>" 
+                       class="btn btn-outline-success btn-sm ms-3">
+                        <i class="bi bi-plus-lg"></i>
+                    </a>
+                </h5>
+            </div>
+
+            <% if (category.documents && category.documents.length > 0) { %>
+                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mb-3">
+                    <% category.documents.forEach(doc => { %>
+                        <div class="col">
+                            <div class="card h-100 shadow-sm border-1 hover-lift">
+                                <div class="card-body d-flex flex-column">
+                                    <h5 class="card-title mb-3">
+                                        <a href="/documents/<%= doc.slug %>" 
+                                            class="text-decoration-none text-primary d-flex align-items-center gap-2">
+                                            <i class="bi bi-file-earmark-text text-primary"></i>
+                                            <span class="text-truncate fw-bold"><%= doc.title %></span>
+                                        </a>
+                                    </h5>
+                                    <div class="mt-auto">
+                                        <div class="d-flex align-items-center text-muted small">
+                                            <div class="d-flex align-items-center">
+                                                <i class="bi bi-clock me-1"></i>
+                                                <span>
+                                                    <%= new Date(doc.updatedAt).toLocaleString('vi-VN', {
+                                                        year: 'numeric',
+                                                        month: '2-digit', 
+                                                        day: '2-digit',
+                                                        hour: '2-digit',
+                                                        minute: '2-digit',
+                                                        hour12: false
+                                                    }).replace(/[,]/g, '') %>
+                                                </span>
+                                            </div>
+                                            <div class="ms-auto">
+                                                <a href="/documents/<%= doc.slug %>/edit" 
+                                                    class="btn btn-link btn-sm text-primary p-0 me-2"
+                                                    title="Sửa tài liệu">
+                                                    <i class="bi bi-pencil-square"></i>
+                                                </a>
+                                                <button type="button"
+                                                    class="btn btn-link btn-sm text-danger p-0"
+                                                    title="Xóa tài liệu" 
+                                                    onclick="deleteDocument('<%= doc.slug %>')">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <% }); %>
+                </div>
+            <% } %>
+
+            <% if (category.children && category.children.length > 0) { %>
+                <% category.children.forEach(child => { %>
+                    <%= renderCategoryDocuments(child, level + 1) %>
+                <% }); %>
+            <% } %>
+        </div>
+    <% } %>
+
+    <% categories.forEach(category => { %>
+        <%= renderCategoryDocuments(category) %>
+    <% }); %>
+<% } %> 
+
+<script>
+function deleteDocument(slug) {
+    if (confirm('Bạn có chắc muốn xóa tài liệu này?')) {
+        fetch(`/documents/${slug}/delete`, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(data => {
+                    throw new Error(data.error || 'Có lỗi xảy ra khi xóa tài liệu');
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                window.location.reload();
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert(error.message);
+        });
+    }
+}
+</script> 

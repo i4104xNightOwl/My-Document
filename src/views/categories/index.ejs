@@ -1,0 +1,133 @@
+<div class="row mb-4">
+    <div class="col">
+        <h1><i class="bi bi-folder"></i> Quản lý danh mục</h1>
+    </div>
+    <div class="col text-end">
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createCategoryModal">
+            <i class="bi bi-plus-circle"></i> Thêm danh mục
+        </button>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Tên danh mục</th>
+                        <th>Danh mục cha</th>
+                        <th>Số tài liệu</th>
+                        <th>Vị trí</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% function renderCategoryRow(category, level = 0) { %>
+                        <tr>
+                            <td>
+                                <%= '─'.repeat(level) %> <%= category.name %>
+                            </td>
+                            <td><%= category.parent ? category.parent.name : '-' %></td>
+                            <td><span class="badge bg-secondary"><%= category.documentsCount %></span></td>
+                            <td><%= category.slot %></td>
+                            <td>
+                                <button class="btn btn-sm btn-primary" 
+                                    onclick="editCategory('<%= category.id %>', '<%= category.name %>', '<%= category.parentId %>', '<%= category.slot %>')">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="btn btn-sm btn-danger" 
+                                    onclick="deleteCategory('<%= category.id %>', '<%= category.name %>')">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <% if (category.children && category.children.length > 0) { %>
+                            <% category.children.forEach(child => { %>
+                                <%= renderCategoryRow(child, level + 1) %>
+                            <% }); %>
+                        <% } %>
+                    <% } %>
+
+                    <% if (categories.length === 0) { %>
+                        <tr>
+                            <td colspan="5" class="text-center">Chưa có danh mục nào</td>
+                        </tr>
+                    <% } else { %>
+                        <% categories.forEach(category => { %>
+                            <%= renderCategoryRow(category) %>
+                        <% }); %>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal chỉnh sửa danh mục -->
+<div class="modal fade" id="editCategoryModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="editCategoryForm" action="/categories/edit" method="POST">
+                <input type="hidden" name="id" id="editCategoryId">
+                <div class="modal-header">
+                    <h5 class="modal-title">Chỉnh sửa danh mục</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="editName" class="form-label">Tên danh mục</label>
+                        <input type="text" class="form-control" id="editName" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editParentId" class="form-label">Danh mục cha</label>
+                        <select class="form-select" id="editParentId" name="parentId">
+                            <option value="">-- Không có --</option>
+                            <% function renderOptions(categories, level = 0) { %>
+                                <% categories.forEach(category => { %>
+                                    <option value="<%= category.id %>">
+                                        <%= '─'.repeat(level) %> <%= category.name %>
+                                    </option>
+                                    <% if (category.children && category.children.length > 0) { %>
+                                        <%= renderOptions(category.children, level + 1) %>
+                                    <% } %>
+                                <% }); %>
+                            <% } %>
+                            <%= renderOptions(categories) %>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editSlot" class="form-label">Vị trí hiển thị</label>
+                        <input type="number" class="form-control" id="editSlot" name="slot" 
+                            min="0" required>
+                        <div class="form-text">Số càng nhỏ hiển thị càng trên</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function editCategory(id, name, parentId, slot) {
+    document.getElementById('editCategoryId').value = id;
+    document.getElementById('editName').value = name;
+    document.getElementById('editParentId').value = parentId || '';
+    document.getElementById('editSlot').value = slot;
+    new bootstrap.Modal(document.getElementById('editCategoryModal')).show();
+}
+
+function deleteCategory(id, name) {
+    if (confirm(`Bạn có chắc muốn xóa danh mục "${name}"?`)) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/categories/${id}/delete`;
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+</script> 

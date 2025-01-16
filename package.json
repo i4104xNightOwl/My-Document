@@ -1,0 +1,34 @@
+{
+    "name": "programming-docs",
+    "version": "1.0.0",
+    "description": "Website tài liệu lập trình sử dụng Node.js, Express và MySQL",
+    "main": "app.js",
+    "scripts": {
+        "start": "node app.js",
+        "dev": "nodemon app.js",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "keywords": [
+        "nodejs",
+        "express",
+        "sqlite",
+        "sequelize",
+        "documentation"
+    ],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "body-parser": "^1.20.2",
+        "ejs": "^3.1.9",
+        "express": "^4.18.2",
+        "express-ejs-layouts": "^2.5.1",
+        "sqlite3": "^5.1.6",
+        "sequelize": "^6.33.0"
+    },
+    "devDependencies": {
+        "nodemon": "^3.0.1"
+    },
+    "engines": {
+        "node": ">=14.0.0"
+    }
+} 

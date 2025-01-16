@@ -1,0 +1,74 @@
+<div class="row">
+    <div class="col-md-12">
+        <h1><i class="bi bi-pencil"></i> Chỉnh sửa tài liệu</h1>
+        
+        <form action="/documents/<%= document.slug %>/edit" method="POST" class="mt-4" onsubmit="return validateForm()">
+            <div class="mb-3">
+                <label for="title" class="form-label">Tiêu đề</label>
+                <input type="text" class="form-control" id="title" name="title" 
+                    value="<%= document.title %>" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="categoryId" class="form-label">Danh mục</label>
+                <select class="form-select" id="categoryId" name="categoryId" required>
+                    <option value="">-- Chọn danh mục --</option>
+                    <% function renderOptions(categories, level = 0) { %>
+                        <% categories.forEach(category => { %>
+                            <option value="<%= category.id %>" 
+                                <%= document.categoryId === category.id ? 'selected' : '' %>>
+                                <%= '─'.repeat(level) %> <%= category.name %>
+                            </option>
+                            <% if (category.children && category.children.length > 0) { %>
+                                <%= renderOptions(category.children, level + 1) %>
+                            <% } %>
+                        <% }); %>
+                    <% } %>
+                    <%= renderOptions(categories) %>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="content" class="form-label">Nội dung</label>
+                <textarea class="form-control editor" id="content" name="content"><%= document.content %></textarea>
+            </div>
+
+            <div class="d-flex gap-2 justify-content-end">
+                <a href="/documents" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Quay lại
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-save"></i> Lưu tài liệu
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+tinymce.init({
+    selector: '.editor',
+    plugins: 'anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount checklist mediaembed casechange export formatpainter pageembed linkchecker a11ychecker tinymcespellchecker permanentpen powerpaste advtable advcode editimage tinycomments tableofcontents footnotes mergetags autocorrect typography inlinecss',
+    toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table mergetags | addcomment showcomments | spellcheckdialog a11ycheck typography | align lineheight | checklist numlist bullist indent outdent | emoticons charmap | removeformat',
+    tinycomments_mode: 'embedded',
+    tinycomments_author: 'Author name',
+    mergetags_list: [
+        { value: 'First.Name', title: 'First Name' },
+        { value: 'Email', title: 'Email' },
+    ],
+    height: 500,
+    language: 'vi',
+    menubar: true,
+    branding: false,
+    promotion: false
+});
+
+function validateForm() {
+    const content = tinymce.get('content').getContent();
+    if (!content) {
+        alert('Vui lòng nhập nội dung tài liệu');
+        return false;
+    }
+    return true;
+}
+</script> 

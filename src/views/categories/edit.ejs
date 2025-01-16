@@ -1,0 +1,28 @@
+<form action="/categories/<%= category.id %>/edit" method="POST">
+    <div class="mb-3">
+        <label for="name" class="form-label">Tên danh mục</label>
+        <input type="text" class="form-control" id="name" name="name" 
+            value="<%= category.name %>" required>
+    </div>
+    <div class="mb-3">
+        <label for="parentId" class="form-label">Danh mục cha</label>
+        <select class="form-select" id="parentId" name="parentId">
+            <option value="">-- Không có --</option>
+            <% categories.forEach(cat => { %>
+                <% if (cat.id !== category.id) { %>
+                    <option value="<%= cat.id %>" 
+                        <%= category.parentId === cat.id ? 'selected' : '' %>>
+                        <%= cat.name %>
+                    </option>
+                <% } %>
+            <% }); %>
+        </select>
+    </div>
+    <div class="mb-3">
+        <label for="slot" class="form-label">Vị trí hiển thị</label>
+        <input type="number" class="form-control" id="slot" name="slot" 
+            value="<%= category.slot %>" min="0" required>
+        <div class="form-text">Số càng nhỏ hiển thị càng trên</div>
+    </div>
+    <button type="submit" class="btn btn-primary">Cập nhật</button>
+</form> 
